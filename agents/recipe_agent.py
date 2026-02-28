@@ -31,19 +31,19 @@ def suggest_recipes(pantry_items: List[Dict[str, Any]], preferences: str = "", t
     User dietary preferences/restrictions: {preferences}
     Current time of day / meal type requested: {time_of_day}
     
-    Suggest up to 3 recipes that prioritize using the ingredients currently available, especially those that might expire soon (if applicable).
-    You can assume basic staples like oil, salt, and pepper are available.
+    Suggest up to 3 recipes that prioritize using the ingredients currently available.
     
-    For each recipe, provide:
+    CRITICAL: 
+    1. Do NOT include any "Thinking" or "Reasoning" steps in your response text outside of the JSON. 
+    2. Return ONLY a valid JSON array of objects.
+    
+    Each object MUST have:
     - "name": Recipe name
-    - "reasoning": Why this recipe was suggested based on their pantry and goals
-    - "missing_ingredients": Any extra ingredients they need to buy
+    - "reasoning": Why this recipe was suggested
+    - "missing_ingredients": Any extra ingredients needed
     - "instructions": Brief, step-by-step instructions
-    - "estimated_calories": An estimated calorie count (integer)
-    - "estimated_protein": Estimated protein in grams (integer)
-    
-    Return the output ONLY as a valid JSON array of objects conforming to these keys.
-    Do not include markdown code block formatting like ```json in your response, just the raw JSON.
+    - "estimated_calories": integer
+    - "estimated_protein": integer
     """
     
     try:

@@ -24,18 +24,20 @@ def process_chat(message: str) -> Dict[str, Any]:
     The user sent the following message: "{message}"
     
     Determine the primary intent of this message. The intent must be one of:
-    - "log_nutrition" (User wants to log what they ate or drank)
-    - "suggest_recipe" (User wants meal or recipe ideas)
-    - "vision_scan" (User mentions they have an image/receipt or want to scan something)
-    - "inventory_query" (User is asking what's in their pantry, or wants to add/remove specific items manually)
-    - "general_chat" (Anything else, or general nutrition/food questions)
+    - "log_nutrition"
+    - "suggest_recipe"
+    - "vision_scan"
+    - "inventory_query"
+    - "general_chat"
 
-    Return the output ONLY as a valid JSON object with the following keys:
+    CRITICAL: 
+    1. Do NOT include any "Thinking" or "Reasoning" steps in your response text outside of the JSON. 
+    2. Return ONLY a valid JSON object.
+
+    JSON Keys:
     - "intent": One of the exact strings above.
-    - "extracted_data": If log_nutrition, put the food description here. If inventory_query, put the items they want to add/query. Otherwise, leave as empty string.
-    - "response": A friendly, brief text response acknowledging their request. E.g., if vision_scan, "Please upload your photo so I can scan it." If log_nutrition, "I'll log that meal for you!"
-    
-    Do not include markdown code block formatting.
+    - "extracted_data": If log_nutrition, put food description. If inventory_query, put items. Otherwise, empty string.
+    - "response": A friendly, brief text response acknowledging their request.
     """
     
     try:

@@ -9,16 +9,16 @@ def clean_json_response(text: str) -> Any:
     text = text.strip()
     
     # 1. Look for markdown code blocks
-    # Note: Using non-greedy match for first block
-    match = re.search(r'```(?:json)?\s*(.*?)\s*```', text, re.DOTALL)
-    if match:
-        json_str = match.group(1).strip()
+    matches = re.findall(r'```(?:json)?\s*(.*?)\s*```', text, re.DOTALL)
+    if matches:
+        # Take the last block as it's usually the intended output after thinking
+        json_str = matches[-1].strip()
     else:
-        # 2. No code blocks, but maybe there is content before/after the JSON
-        # This regex tries to find the outermost matching braces/brackets
-        json_match = re.search(r'(\{.*\}|\[.*\])', text, re.DOTALL)
+        # 2. No code blocks, try to find the last occurrence of a JSON structure
+        # This handles cases where thinking text precedes the JSON
+        json_match = re.findall(r'(\{.*\}|\[.*\])', text, re.DOTALL)
         if json_match:
-            json_str = json_match.group(1).strip()
+            json_str = json_match[-1].strip()
         else:
             json_str = text
 

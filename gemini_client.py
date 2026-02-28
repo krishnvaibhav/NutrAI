@@ -19,7 +19,7 @@ def ask_gemini(prompt: str) -> str:
         return "Error: Gemini API key not configured."
     
     try:
-        model = genai.GenerativeModel("Gemma-3-27B")
+        model = genai.GenerativeModel("models/gemma-3-27b-it")
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
