@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Send, Image as ImageIcon, Loader2, Bot, User, CheckCircle } from 'lucide-react';
+import { Send, Image as ImageIcon, Bot, User, CheckCircle } from 'lucide-react';
+import AILoader from '../components/AILoader';
 
 import { useGlobalContext } from '../GlobalContext';
 
@@ -176,12 +177,9 @@ const ChatAgentPage: React.FC = () => {
                         </div>
                     ))}
                     {loading && (
-                        <div style={{ display: 'flex', gap: '1rem', alignSelf: 'flex-start' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
-                                <Bot size={18} />
-                            </div>
-                            <div style={{ padding: '1rem', borderRadius: 'var(--radius-md)', background: 'rgba(255, 255, 255, 0.05)' }}>
-                                <Loader2 className="lucide-spin" size={20} color="var(--text-secondary)" />
+                        <div className="animate-slide-up" style={{ alignSelf: 'flex-start', maxWidth: '280px' }}>
+                            <div style={{ borderRadius: 'var(--radius-lg)', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <AILoader message="Processing" variant="chat" />
                             </div>
                         </div>
                     )}

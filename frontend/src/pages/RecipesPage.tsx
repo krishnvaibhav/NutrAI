@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { ChefHat, Loader2, Sparkles, Flame, Activity } from 'lucide-react';
+import { ChefHat, Sparkles, Flame, Activity } from 'lucide-react';
+import AILoader from '../components/AILoader';
 
 interface Recipe {
     name: string;
@@ -69,13 +70,19 @@ const RecipesPage: React.FC = () => {
                         </select>
                     </div>
                     <button type="submit" className="btn-primary" disabled={loading} style={{ background: 'var(--accent-secondary)', boxShadow: '0 4px 14px 0 rgba(16, 185, 129, 0.39)' }}>
-                        {loading ? <Loader2 className="lucide-spin" size={18} /> : <Sparkles size={18} />}
-                        {loading ? 'Thinking...' : 'Suggest Meals'}
+                        <Sparkles size={18} />
+                        Suggest Meals
                     </button>
                 </form>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                {loading && (
+                    <div className="glass-panel">
+                        <AILoader message="Crafting recipes from your pantry" variant="recipe" />
+                    </div>
+                )}
+
                 {recipes.length === 0 && !loading && (
                     <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-secondary)' }}>
                         <ChefHat size={64} opacity={0.1} style={{ margin: '0 auto 1.5rem' }} />

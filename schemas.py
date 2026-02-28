@@ -12,7 +12,9 @@ class PantryItemCreate(PantryItemBase):
     pass
 
 class PantryItemUpdate(BaseModel):
+    name: Optional[str] = None
     quantity: Optional[float] = None
+    unit: Optional[str] = None
     expiry_date: Optional[date] = None
 
 class PantryItem(PantryItemBase):

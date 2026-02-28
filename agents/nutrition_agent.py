@@ -16,7 +16,7 @@ def analyze_meal(meal_description: str) -> Dict[str, Any]:
     if not API_KEY:
         raise ValueError("Gemini API key is not configured.")
 
-    model = genai.GenerativeModel("gemma-3-12b-it")
+    model = genai.GenerativeModel("models/gemma-3-12b-it")
     
     prompt = f"""
     Analyze the following meal description and estimate its nutritional content.
@@ -29,8 +29,9 @@ def analyze_meal(meal_description: str) -> Dict[str, Any]:
     - "carbs": Estimated carbohydrates in grams (integer)
     - "fat": Estimated fat in grams (integer)
     
-    Return the output ONLY as a valid JSON object with exactly these keys.
-    Do not include markdown code block formatting like ```json.
+    CRITICAL: 
+    1. Do NOT include any "Thinking" or "Reasoning" steps in your response text outside of the JSON. 
+    2. Return ONLY a valid JSON object with exactly these keys.
     """
     
     try:

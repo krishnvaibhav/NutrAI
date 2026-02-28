@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Activity, Target, Loader2 } from 'lucide-react';
+import { Activity, Target } from 'lucide-react';
+import AILoader from '../components/AILoader';
 
 interface NutritionLog {
     id: number;
@@ -64,9 +65,7 @@ const NutritionPage: React.FC = () => {
                     <Target size={18} /> AI Health Insight
                 </h2>
                 {(!healthSummary && loading) ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                        <Loader2 className="lucide-spin" size={16} /> Analyzing your logs...
-                    </div>
+                    <AILoader message="Analyzing your nutrition" variant="nutrition" />
                 ) : (
                     <>
                         <p style={{ color: 'var(--text-primary)', lineHeight: 1.6, margin: 0 }}>
@@ -74,7 +73,10 @@ const NutritionPage: React.FC = () => {
                         </p>
                         {(loading && healthSummary) && (
                             <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.7 }}>
-                                <Loader2 className="lucide-spin" size={10} /> Syncing logs...
+                                <span className="ai-dot" style={{ animationDelay: '0s' }}>.</span>
+                                <span className="ai-dot" style={{ animationDelay: '0.2s' }}>.</span>
+                                <span className="ai-dot" style={{ animationDelay: '0.4s' }}>.</span>
+                                <span style={{ marginLeft: '0.25rem' }}>Syncing logs</span>
                             </div>
                         )}
                     </>
