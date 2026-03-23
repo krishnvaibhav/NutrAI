@@ -1,0 +1,60 @@
+# NutrAI Bug Report & Analysis
+
+This report outlines the bugs, UX issues, and performance bottlenecks identified in the NutrAI (Smart Inventory & Health) application.
+
+## 🔴 High Priority (Functional & Quota Issues)
+
+### 1. Gemini API Quota Exhaustion (Error 429)
+- **Issue**: The application frequently hits rate limits with the Gemini API.
+- **Evidence**: [error_log.txt](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/error_log.txt) shows `google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quota`.
+- **Reason**: The app uses `gemini-1.5-pro` (or `gemma-3-27b-it`) for almost all tasks, including simple classification.
+- **Impact**: AI features (chat, nutrition analysis, recipes) become unavailable once the quota is hit.
+
+### 2. Branding Inconsistency ("xoxo" vs "NutriAI")
+- **Issue**: The user requested the AI be named "xoxo", but the UI still uses "NutriAI".
+- **Evidence**: 
+    - [App.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/App.tsx): Sidebar header says `NutriAI`.
+    - [ChatAgentPage.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/pages/ChatAgentPage.tsx): Header and initial greeting use `NutriAI`.
+    - [GlobalContext.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/GlobalContext.tsx): Initial message says `Hi! I'm NutriAI`.
+- **Impact**: Confusing user experience; doesn't match the desired personality.
+
+### 3. Missing Recipe Details
+- **Issue**: Recipes are missing "exact measurements" and "servings" in the way the user expects, despite the prompt requesting them.
+- **Evidence**: [userBugs.txt](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/userBugs.txt) specifically requests "cooking steps with exact measurements and how many serves can it produce, also the cost per dish".
+- **Analysis**: While the prompt technically asks for these, the instructions in [recipe_agent.py](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/agents/recipe_agent.py) might need more explicit formatting (e.g., Markdown tables or bolded measurements) to ensure the model complies strictly.
+
+---
+
+## 🟡 Medium Priority (UX & State)
+
+### 4. Recipe Persistence & Expansion State
+- **Issue**: Recipes refresh/collapse when navigating between pages.
+- **Evidence**: [userBugs.txt](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/userBugs.txt): "Recipies should not be refreshed everytime the page is changed".
+- **Analysis**: While the recipe list is in [GlobalContext](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/GlobalContext.tsx#67-74), the `expandedIdx` (which recipe is open) is local to [RecipesPage.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/pages/RecipesPage.tsx). Navigating away collapses everything. Also, if the user meant "refresh" as in "re-fetching", the UI might be triggering state resets inadvertently or the user feels forced to click "Suggest" too often.
+
+### 5. AI Latency (SpeedBug)
+- **Issue**: AI responses take 30-40 seconds.
+- **Evidence**: [SpeedBug.txt](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/SpeedBug.txt) analysis.
+- **Reason**: Sequential calls (orchestrator -> nutrition agent) and lack of streaming.
+- **Impact**: Poor user engagement; feels "broken" or "slow".
+
+---
+
+## 🟢 Low Priority (UI/UX Refinements)
+
+### 6. Nutrition Dashboard "Syncing" State
+- **Issue**: Every time the [NutritionPage](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/pages/NutritionPage.tsx#18-222) mounts, it shows "Syncing logs" if the count has changed.
+- **Enhancement**: Use a more subtle background sync or cache the summary until a NEW log is added.
+
+### 7. Cost per Dish Formatting
+- **Issue**: Cost is shown as `~${recipe.cost_per_dish.toFixed(2)} AUD`.
+- **Enhancement**: Ensure the currency is consistent with the user's locale (requested AUD, which is implemented, but could be prettier).
+
+---
+
+## 📋 Suggested Fixes (Roadmap)
+1. **Rename AI**: Update all instances of "NutriAI" to "xoxo" in [App.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/App.tsx), [ChatAgentPage.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/pages/ChatAgentPage.tsx), and [GlobalContext.tsx](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/GlobalContext.tsx).
+2. **Optimize Models**: Switch the Orchestrator to a faster model (e.g., `gemini-1.5-flash`) to reduce latency and save quota.
+3. **Enhance Recipe Prompt**: Update [recipe_agent.py](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/agents/recipe_agent.py) to demand a structured table for ingredients and bolded measurements in instructions.
+4. **Persistent Expansion**: Move `expandedIdx` or the "selected recipe" to [GlobalContext](file:///c:/Users/krish/.gemini/antigravity/scratch/Smart_Inventory/frontend/src/GlobalContext.tsx#67-74).
+5. **Implement Streaming**: Modify the API and frontend to support streaming responses (requires significant refactor).

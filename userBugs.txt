@@ -1,0 +1,5 @@
+Recipies should not be refreshed everytime the page is changed, it should stay there , fix the state
+
+in recipies , once clicked on the recipie , show all cooking stps with exact measurements and how many serves can it produce, also the cost per dish 
+
+give the ai chat a name xoxo

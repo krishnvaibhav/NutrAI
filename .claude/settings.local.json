@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import main; print\\(''Backend imports OK''\\)\")",
+      "Bash(npx tsc --noEmit)"
+    ]
+  }
+}

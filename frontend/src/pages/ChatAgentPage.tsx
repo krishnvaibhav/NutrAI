@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { Send, Image as ImageIcon, Bot, User, CheckCircle } from 'lucide-react';
 import AILoader from '../components/AILoader';
-
 import { useGlobalContext } from '../GlobalContext';
+import { apiCall } from '../api';
 
 const ChatAgentPage: React.FC = () => {
     const { chatMessages, setChatMessages } = useGlobalContext();
@@ -11,6 +11,7 @@ const ChatAgentPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [visionItems, setVisionItems] = useState<any[]>([]);
     const [recipeSuggestions, setRecipeSuggestions] = useState<any[]>([]);
+    const [upgradeMsg, setUpgradeMsg] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -31,22 +32,40 @@ const ChatAgentPage: React.FC = () => {
         setInput('');
         setRecipeSuggestions([]);
         setVisionItems([]);
+        setUpgradeMsg('');
         setLoading(true);
 
+        const history = chatMessages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+
         try {
-            const res = await axios.post('http://localhost:8000/agents/chat', { message: userMsg });
-            const { intent, response, extracted_data } = res.data;
+            const res = await apiCall('POST', '/agents/chat', { message: userMsg, history });
+            const { intent, response, extracted_data } = res;
 
             setChatMessages(prev => [...prev, { role: 'assistant', content: response }]);
 
-            // Auto-handle actions based on orchestrator intent
             if (intent === 'log_nutrition' && extracted_data) {
-                await axios.post('http://localhost:8000/agents/nutrition/analyze', { meal_description: extracted_data });
-                setChatMessages(prev => [...prev, { role: 'assistant', content: "✅ I've successfully logged that meal to your nutrition dashboard." }]);
+                try {
+                    await apiCall('POST', '/agents/nutrition/analyze', { meal_description: extracted_data });
+                    setChatMessages(prev => [...prev, { role: 'assistant', content: "✅ I've successfully logged that meal to your nutrition dashboard." }]);
+                } catch (err: unknown) {
+                    const e = err as Error & { status?: number };
+                    if (e.status === 403) {
+                        setUpgradeMsg(e.message);
+                        setChatMessages(prev => [...prev, { role: 'assistant', content: "⚠️ AI meal logging is a Pro feature. You can still log manually on the Health page." }]);
+                    } else {
+                        setChatMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Couldn't save to dashboard. Try manually on the Health page." }]);
+                    }
+                }
             } else if (intent === 'suggest_recipe') {
-                const recipeRes = await axios.post('http://localhost:8000/agents/recipe/suggest', { preferences: '', time_of_day: '' });
-                setRecipeSuggestions(recipeRes.data);
-                // The assistant response already acknowledged pulling up recipes, so we just set the data.
+                try {
+                    const recipeData = await apiCall('POST', '/agents/recipe/suggest', { preferences: '', time_of_day: '' });
+                    setRecipeSuggestions(recipeData);
+                } catch (err: unknown) {
+                    const e = err as Error & { status?: number };
+                    if (e.status === 403) {
+                        setUpgradeMsg(e.message);
+                    }
+                }
             }
 
         } catch (e) {
@@ -62,22 +81,24 @@ const ChatAgentPage: React.FC = () => {
         if (!file) return;
 
         setChatMessages(prev => [...prev, { role: 'user', content: `[Uploaded Image: ${file.name}]`, isImage: true }]);
+        setUpgradeMsg('');
         setLoading(true);
 
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            const res = await axios.post('http://localhost:8000/agents/vision/scan', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            setVisionItems(res.data);
+            const data = await apiCall('POST', '/agents/vision/scan', formData, true);
+            setVisionItems(data);
             setChatMessages(prev => [...prev, { role: 'assistant', content: "I've scanned the image. Here is what I found. Do you want to add these to your pantry?" }]);
-        } catch (err) {
-            console.error(err);
-            setChatMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Sorry, I couldn't process that image." }]);
+        } catch (err: unknown) {
+            const e = err as Error & { status?: number };
+            if (e.status === 403) {
+                setUpgradeMsg(e.message);
+                setChatMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Vision scanning is a Pro feature." }]);
+            } else {
+                setChatMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Sorry, I couldn't process that image." }]);
+            }
         } finally {
             setLoading(false);
         }
@@ -88,7 +109,7 @@ const ChatAgentPage: React.FC = () => {
         let successCount = 0;
         try {
             for (const item of visionItems) {
-                await axios.post('http://localhost:8000/pantry', item);
+                await apiCall('POST', '/pantry', item);
                 successCount++;
             }
             setVisionItems([]);
@@ -102,14 +123,26 @@ const ChatAgentPage: React.FC = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '800px', margin: '0 auto', padding: '1rem', paddingBottom: 0 }}>
+        <div className="page-content" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 2rem)', maxWidth: '840px', paddingBottom: 0 }}>
             <header style={{ marginBottom: '1.5rem', marginTop: '0.5rem' }}>
                 <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <Bot size={32} color="var(--accent-primary)" />
-                    Orchestrator Agent
+                    NutriAI
                 </h1>
-                <p style={{ color: 'var(--text-secondary)' }}>I can route your requests to the right AI agent. Ask me anything!</p>
+                <p style={{ color: 'var(--text-secondary)' }}>Your personal nutrition & pantry assistant. Log meals, get recipes, or scan your fridge!</p>
             </header>
+
+            {upgradeMsg && (
+                <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1rem', borderLeft: '4px solid var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                        <p style={{ fontWeight: 600, margin: 0 }}>Pro Feature</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: '0.25rem 0 0' }}>{upgradeMsg}</p>
+                    </div>
+                    <Link to="/account">
+                        <button className="btn-primary">Upgrade to Pro</button>
+                    </Link>
+                </div>
+            )}
 
             <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', marginBottom: '1rem' }}>
 
@@ -201,7 +234,7 @@ const ChatAgentPage: React.FC = () => {
                             onClick={() => fileInputRef.current?.click()}
                             className="btn-secondary"
                             style={{ padding: '0.75rem', borderRadius: '50%', width: '48px', height: '48px' }}
-                            title="Upload photo of fridge or receipt"
+                            title="Upload photo of fridge or receipt (Pro)"
                         >
                             <ImageIcon size={20} />
                         </button>

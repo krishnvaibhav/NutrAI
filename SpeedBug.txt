@@ -1,0 +1,28 @@
+# SpeedBug Analysis - Smart Inventory AI Latency
+
+This document outlines why AI features (Chat, Recipes, Nutrition) are taking a significant amount of time to complete.
+
+## 1. Sequential Gemini Calls (Chat Bottleneck)
+The 'NutriAI' chat interface experiences the worst latency because it performs two AI calls back-to-back:
+-   **Step 1:** The `orchestrator_agent` (using Gemma 3 27B) analyzes the message to find the intent.
+-   **Step 2:** If the intent is meal logging, the frontend triggers a second call to the `nutrition_agent` (using Gemma 3 12B) to extract macros.
+-   **Result:** A single user message takes the sum of both model generation times (often 30-40 seconds total).
+
+## 2. Large Model Overhead
+The application consistently uses very large parameter models for simple tasks:
+-   `models/gemma-3-27b-it` (Orchestrator and Recipe Agent)
+-   `models/gemma-3-12b-it` (Nutrition Agent)
+While these provide high-quality reasoning, they are naturally slower than smaller models. Simple classification (Orchestrator) could likely be handled by a much smaller/faster model.
+
+## 3. Lack of Streaming / JSON Blocking
+The backend `utils.py` uses a standard JSON parser that requires the **entire response** to be generated before any processing occurs. 
+-   The UI shows a "Processing" loader while waiting for 100% of the JSON to arrive.
+-   There is no streaming logic implemented, so the user sees 0 progress until the very end.
+
+## 4. Prompt Redundancy & Extraction
+The `clean_json_response` utility suggests the models occasionally output "thinking" or preamble text despite instructions. The backend must wait for this non-essential text to be generated entirely before the JSON can be extracted.
+
+## Recommendations (For Future Implementation)
+1.  **Switch to Smaller Models:** Use faster/smaller variants for the Orchestrator (e.g., Gemma 3 2B/4B) where high-level reasoning isn't required.
+2.  **Combine Tasks:** The Orchestrator should attempt to extract nutrition data directly if the intent is clear, avoiding the second sequential call.
+3.  **Implement Streaming:** Modify the frontend/backend to stream responses where possible, showing partial text/loading states.
