@@ -81,12 +81,25 @@ const PantryPage: React.FC = () => {
             unit: newItemParams.unit,
         };
         if (newItemParams.expiry_date) payload.expiry_date = newItemParams.expiry_date;
+        // Optimistic: add placeholder immediately
+        const tempId = `temp-${Date.now()}`;
+        const optimistic: PantryItem = {
+            id: tempId,
+            name: newItemParams.name,
+            quantity: parseFloat(newItemParams.quantity) || 1,
+            unit: newItemParams.unit,
+            expiry_date: newItemParams.expiry_date || null,
+            date_added: new Date().toISOString(),
+        };
+        setItems(prev => [optimistic, ...prev]);
+        setNewItemParams({ name: '', quantity: '', unit: 'count', expiry_date: '' });
+        setShowAddForm(false);
         try {
-            await apiCall('POST', '/pantry', payload);
-            setNewItemParams({ name: '', quantity: '', unit: 'count', expiry_date: '' });
-            setShowAddForm(false);
-            fetchItems();
+            const created = await apiCall('POST', '/pantry', payload);
+            // Replace temp item with real one from server
+            setItems(prev => prev.map(i => i.id === tempId ? created : i));
         } catch (err: unknown) {
+            setItems(prev => prev.filter(i => i.id !== tempId));
             const e = err as Error & { status?: number };
             if (e.status === 403) setUpgradeMsg(e.message);
             else console.error(e);
@@ -94,10 +107,14 @@ const PantryPage: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
+        // Optimistic: remove immediately
+        setItems(prev => prev.filter(i => i.id !== id));
         try {
             await apiCall('DELETE', `/pantry/${id}`);
-            fetchItems();
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            fetchItems(); // restore on error
+        }
     };
 
     const startEdit = (item: PantryItem) => {
@@ -106,17 +123,22 @@ const PantryPage: React.FC = () => {
     };
 
     const handleSaveEdit = async (id: string) => {
-        const payload: Record<string, unknown> = {
+        const updated: Partial<PantryItem> = {
             name: editParams.name,
             quantity: parseFloat(editParams.quantity) || 1,
             unit: editParams.unit,
             expiry_date: editParams.expiry_date || null,
         };
+        const prev = items.find(i => i.id === id);
+        // Optimistic: update immediately
+        setItems(items.map(i => i.id === id ? { ...i, ...updated } : i));
+        setEditingId(null);
         try {
-            await apiCall('PUT', `/pantry/${id}`, payload);
-            setEditingId(null);
-            fetchItems();
-        } catch (e) { console.error(e); }
+            await apiCall('PUT', `/pantry/${id}`, { ...updated, expiry_date: updated.expiry_date ?? null });
+        } catch (e) {
+            console.error(e);
+            if (prev) setItems(items.map(i => i.id === id ? prev : i)); // restore on error
+        }
     };
 
     const unitOptions = ['count', 'kg', 'grams', 'liters', 'ml'];

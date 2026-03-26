@@ -32,11 +32,15 @@ const NutritionPage: React.FC = () => {
         if (!mealDescription.trim()) return;
         setUpgradeMsg('');
         setLoggingMeal(true);
+        const desc = mealDescription;
+        setMealDescription('');
         try {
-            await apiCall('POST', '/agents/nutrition/analyze', { meal_description: mealDescription });
-            setMealDescription('');
-            await fetchData();
+            const newLog: NutritionLog = await apiCall('POST', '/agents/nutrition/analyze', { meal_description: desc });
+            // Update UI immediately with the returned log — no refetch needed
+            setLogs(prev => [...prev, newLog]);
+            setLastLogCount(lastLogCount + 1);
         } catch (err: unknown) {
+            setMealDescription(desc); // restore input on error
             const e = err as Error & { status?: number };
             if (e.status === 403) setUpgradeMsg(e.message);
             else console.error(e);

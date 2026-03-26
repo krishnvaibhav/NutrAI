@@ -3,6 +3,11 @@ import { auth } from './firebase';
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const TIMEOUT_MS = 30_000;
 
+// Wake up the backend on app load to avoid cold-start delays on first real request
+export function pingBackend() {
+  fetch(`${BASE}/health`).catch(() => {});
+}
+
 export async function apiCall(
   method: string,
   path: string,

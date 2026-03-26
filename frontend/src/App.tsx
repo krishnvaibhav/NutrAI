@@ -15,6 +15,7 @@ import ContactPage from './pages/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
+import { pingBackend } from './api';
 
 function App() {
   const location = useLocation();
@@ -24,6 +25,8 @@ function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('pantryai-theme') as 'light' | 'dark') || 'light';
   });
+
+  useEffect(() => { pingBackend(); }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
