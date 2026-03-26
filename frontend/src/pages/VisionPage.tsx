@@ -115,15 +115,16 @@ const VisionPage: React.FC = () => {
           position: 'relative',
           borderRadius: '20px',
           overflow: 'hidden',
-          background: preview ? 'transparent' : '#1A1A1A',
+          background: preview ? 'transparent' : 'var(--bg-tertiary)',
           cursor: loading ? 'default' : 'pointer',
           marginBottom: '1.5rem',
           minHeight: '320px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-md)',
+          border: preview ? '1px solid var(--border)' : '2px dashed var(--border)',
+          boxShadow: 'var(--shadow-sm)',
+          transition: 'border-color var(--transition-fast)',
         }}
       >
         <input type="file" accept="image/*" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileChange} />
@@ -131,11 +132,7 @@ const VisionPage: React.FC = () => {
         {/* Corner bracket guides */}
         {!preview && !loading && (
           <>
-            {[['top:16px;left:16px', 'top:0;left:0;borderTop', 'top:0;left:0;borderLeft'],
-              ['top:16px;right:16px', 'top:0;right:0;borderTop', 'top:0;right:0;borderRight'],
-              ['bottom:16px;left:16px', 'bottom:0;left:0;borderBottom', 'bottom:0;left:0;borderLeft'],
-              ['bottom:16px;right:16px', 'bottom:0;right:0;borderBottom', 'bottom:0;right:0;borderRight'],
-            ].map((_, idx) => {
+            {[0, 1, 2, 3].map(idx => {
               const positions = [
                 { outer: { top: 16, left: 16 }, h: { top: 0, left: 0 }, v: { top: 0, left: 0 } },
                 { outer: { top: 16, right: 16 }, h: { top: 0, right: 0 }, v: { top: 0, right: 0 } },
@@ -143,12 +140,10 @@ const VisionPage: React.FC = () => {
                 { outer: { bottom: 16, right: 16 }, h: { bottom: 0, right: 0 }, v: { bottom: 0, right: 0 } },
               ];
               const pos = positions[idx];
-              const borderH = idx < 2 ? 'borderTop' : 'borderBottom';
-              const borderV = idx === 0 || idx === 2 ? 'borderLeft' : 'borderRight';
               return (
                 <div key={idx} style={{ position: 'absolute', width: '40px', height: '40px', ...pos.outer }}>
-                  <div style={{ position: 'absolute', width: '100%', height: '3px', background: 'rgba(255,255,255,0.6)', ...pos.h, [borderH === 'borderTop' ? 'top' : 'bottom']: 0 }} />
-                  <div style={{ position: 'absolute', width: '3px', height: '100%', background: 'rgba(255,255,255,0.6)', ...pos.v, [borderV === 'borderLeft' ? 'left' : 'right']: 0 }} />
+                  <div style={{ position: 'absolute', width: '100%', height: '3px', background: 'var(--accent-primary)', ...pos.h, [idx < 2 ? 'top' : 'bottom']: 0 }} />
+                  <div style={{ position: 'absolute', width: '3px', height: '100%', background: 'var(--accent-primary)', ...pos.v, [idx === 0 || idx === 2 ? 'left' : 'right']: 0 }} />
                 </div>
               );
             })}
@@ -157,8 +152,8 @@ const VisionPage: React.FC = () => {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <ScanLine size={48} color="white" style={{ margin: '0 auto 1rem', display: 'block', opacity: 0.8 }} className="lucide-spin" />
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem' }}>Scanning with AI vision...</p>
+            <ScanLine size={48} color="var(--accent-primary)" style={{ margin: '0 auto 1rem', display: 'block' }} className="lucide-spin" />
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Scanning with AI vision...</p>
           </div>
         ) : preview ? (
           <div style={{ width: '100%', position: 'relative' }}>
@@ -182,17 +177,17 @@ const VisionPage: React.FC = () => {
                 {item.name}
               </div>
             ))}
-            <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', backdropFilter: 'blur(4px)' }}>
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(45,74,62,0.85)', color: 'white', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem' }}>
               Click to re-scan
             </div>
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-            <Camera size={56} color="rgba(255,255,255,0.3)" style={{ margin: '0 auto 1.25rem', display: 'block' }} />
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', fontWeight: 500, marginBottom: '0.5rem' }}>
+            <Camera size={56} color="var(--accent-primary)" style={{ margin: '0 auto 1.25rem', display: 'block', opacity: 0.6 }} />
+            <p style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: 500, marginBottom: '0.5rem' }}>
               Drop image here or click to upload
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
               Supports JPG, PNG, WEBP — fridge photos or grocery receipts
             </p>
           </div>

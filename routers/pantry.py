@@ -1,13 +1,19 @@
+import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status, UploadFile, File
 from typing import List
 
 from firestore_db import get_firestore
 from dependencies import get_current_user, require_pro
 import schemas
 from agents import vision_agent
+from limiter import limiter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["pantry"])
+
+MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 
 def _doc_to_pantry(doc) -> dict:
@@ -17,9 +23,14 @@ def _doc_to_pantry(doc) -> dict:
 
 
 @router.get("/pantry", response_model=List[schemas.PantryItem])
-def get_pantry(db=Depends(get_firestore), user=Depends(get_current_user)):
+def get_pantry(
+    db=Depends(get_firestore),
+    user=Depends(get_current_user),
+    limit: int = Query(200, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     uid = user["uid"]
-    docs = db.collection("users").document(uid).collection("pantry").stream()
+    docs = db.collection("users").document(uid).collection("pantry").limit(limit).offset(offset).stream()
     return [_doc_to_pantry(doc) for doc in docs]
 
 
@@ -62,15 +73,25 @@ def delete_pantry_item(item_id: str, db=Depends(get_firestore), user=Depends(get
 
 
 @router.post("/agents/vision/scan", response_model=List[schemas.PantryItemBase])
-async def scan_receipt_or_fridge(file: UploadFile = File(...), user=Depends(require_pro)):
+@limiter.limit("5/minute")
+async def scan_receipt_or_fridge(
+    request: Request,  # noqa: ARG001 — required by slowapi for rate limiting
+    file: UploadFile = File(...),
+    user=Depends(require_pro),
+):
     """Pro-only: scan fridge/receipt image and return identified items."""
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File provided is not an image.")
+
+    image_bytes = await file.read()
+    if len(image_bytes) > MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image must be smaller than 10 MB.")
+
     try:
-        image_bytes = await file.read()
         items = vision_agent.parse_fridge_image(image_bytes, file.content_type)
         return items
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+    except Exception:
+        logger.exception("Vision scan failed for user %s", user["uid"])
+        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")

@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
         <div className="animate-fade-in page-content">
             {/* Header */}
             <header style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2.8rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '0.4rem' }}>
+                <h1 className="page-hero-title" style={{ fontSize: '2.8rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '0.4rem' }}>
                     The Command Center
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
@@ -77,7 +77,7 @@ const HomePage: React.FC = () => {
             </header>
 
             {/* Stat Cards Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+            <div className="home-stat-grid" style={{ marginBottom: '2rem' }}>
                 {/* Total Items */}
                 <div className="glass-panel" style={{ padding: '1.5rem' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -130,7 +130,7 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Main 2-col layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.5rem', alignItems: 'start' }}>
+            <div className="home-main-grid">
 
                 {/* AI Insight Panel */}
                 {!dismissedInsight && (

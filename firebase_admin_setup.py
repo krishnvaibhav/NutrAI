@@ -15,9 +15,6 @@ def init_firebase():
     # Replace literal \n sequences with real newlines (handles both dotenv-expanded and unexpanded)
     if "\\n" in private_key:
         private_key = private_key.replace("\\n", "\n")
-    print(f"[firebase] key starts: {repr(private_key[:40])}")
-    print(f"[firebase] key ends:   {repr(private_key[-40:])}")
-
     client_email = (os.getenv("FIREBASE_CLIENT_EMAIL") or "").strip().strip('"').strip("'")
 
     cred = credentials.Certificate({

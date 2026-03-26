@@ -279,12 +279,93 @@ select.glass-input {
   background-clip: text;
 }
 
-/* Responsive Utilities */
+/* ===== Responsive Grid Classes ===== */
+.home-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.home-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.pantry-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.add-item-form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+/* ===== Responsive: Tablet (≤ 900px) ===== */
+@media (max-width: 900px) {
+  .home-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pantry-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Responsive: Mobile (≤ 768px) ===== */
 @media (max-width: 768px) {
-  .pantry-grid { grid-template-columns: 1fr !important; }
+  .page-content {
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .home-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pantry-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-item-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pantry-card-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
   .macro-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .recipe-form-grid { grid-template-columns: 1fr !important; }
-  .pantry-card-grid { grid-template-columns: 1fr !important; }
+
+  /* Scale down big headings */
+  .page-hero-title {
+    font-size: 1.8rem !important;
+  }
+}
+
+/* ===== Responsive: Small Mobile (≤ 480px) ===== */
+@media (max-width: 480px) {
+  .home-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pantry-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .add-item-form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Layout Utilities */

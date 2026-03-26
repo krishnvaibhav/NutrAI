@@ -1,14 +1,14 @@
+import logging
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not API_KEY:
-    print("Warning: GEMINI_API_KEY not found in environment variables.")
-else:
+if API_KEY:
     genai.configure(api_key=API_KEY)
 
 def ask_gemini(prompt: str) -> str:

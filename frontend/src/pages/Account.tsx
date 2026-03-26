@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { Crown, LogOut, Lock, Zap } from 'lucide-react';
+import { Crown, LogOut, Lock, Bell, CheckCircle } from 'lucide-react';
 import { auth } from '../firebase';
 import { apiCall } from '../api';
 import { useAuth } from '../context/AuthContext';
+
+const PRO_ENABLED = import.meta.env.VITE_PRO_ENABLED === 'true';
 
 export default function Account() {
   const { currentUser, userTier } = useAuth();
@@ -18,6 +20,8 @@ export default function Account() {
 
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [upgradeError, setUpgradeError] = useState('');
+  const [waitlistJoined, setWaitlistJoined] = useState(false);
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   const handleUpgrade = async () => {
     setUpgradeError('');
@@ -33,6 +37,16 @@ export default function Account() {
     }
   };
 
+  const handleJoinWaitlist = async () => {
+    setWaitlistLoading(true);
+    try {
+      await apiCall('POST', '/payments/waitlist');
+      setWaitlistJoined(true);
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwError('');
@@ -41,7 +55,6 @@ export default function Account() {
       setPwError('New password must be at least 6 characters.');
       return;
     }
-    if (!currentUser?.email) return;
     setPwLoading(true);
     try {
       const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
@@ -64,11 +77,13 @@ export default function Account() {
   };
 
   const isPro = userTier === 'pro';
+  const isEmailUser = currentUser?.providerData?.[0]?.providerId === 'password';
+  const identity = currentUser?.email ?? currentUser?.phoneNumber ?? 'User';
 
   return (
     <div className="page-content" style={{ maxWidth: '680px' }}>
       <h2 className="text-gradient" style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Account</h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{currentUser?.email}</p>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{identity}</p>
 
       {/* Subscription */}
       <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
@@ -97,25 +112,49 @@ export default function Account() {
         </div>
 
         {!isPro && (
-          <>
-            {upgradeError && (
-              <p style={{ color: '#f87171', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{upgradeError}</p>
-            )}
-            <button
-              onClick={handleUpgrade}
-              disabled={upgradeLoading}
-              className="btn-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              <Zap size={16} />
-              {upgradeLoading ? 'Redirecting...' : 'Upgrade to Pro'}
-            </button>
-          </>
+          PRO_ENABLED ? (
+            <>
+              {upgradeError && (
+                <p style={{ color: 'var(--accent-danger)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{upgradeError}</p>
+              )}
+              <button
+                onClick={handleUpgrade}
+                disabled={upgradeLoading}
+                className="btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                {upgradeLoading ? 'Redirecting...' : 'Upgrade to Pro'}
+              </button>
+            </>
+          ) : (
+            <div style={{ background: 'rgba(45,74,62,0.06)', border: '1px solid rgba(45,74,62,0.15)', borderRadius: 'var(--radius-md)', padding: '1.25rem' }}>
+              <p style={{ fontWeight: 600, margin: '0 0 0.35rem', color: 'var(--text-primary)' }}>Pro is launching soon</p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 1rem' }}>
+                Unlimited recipes, AI vision scan, and advanced nutrition insights. Be the first to know when it's live.
+              </p>
+              {waitlistJoined ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-secondary)', fontSize: '0.875rem', fontWeight: 500 }}>
+                  <CheckCircle size={16} />
+                  You're on the list — we'll email you when Pro launches.
+                </div>
+              ) : (
+                <button
+                  onClick={handleJoinWaitlist}
+                  disabled={waitlistLoading}
+                  className="btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <Bell size={15} />
+                  {waitlistLoading ? 'Saving...' : 'Notify me when Pro launches'}
+                </button>
+              )}
+            </div>
+          )
         )}
       </div>
 
-      {/* Change Password */}
-      <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+      {/* Change Password — only for email/password accounts */}
+      {isEmailUser && <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Lock size={20} color="var(--accent-primary)" />
           Change Password
@@ -165,7 +204,7 @@ export default function Account() {
             {pwLoading ? 'Updating...' : 'Update Password'}
           </button>
         </form>
-      </div>
+      </div>}
 
       {/* Sign Out */}
       <button

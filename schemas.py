@@ -1,14 +1,14 @@
 import re
-from pydantic import BaseModel, field_validator
-from datetime import date, datetime
+from pydantic import BaseModel, Field, field_validator
+from datetime import date as Date_, datetime
 from typing import Optional, List
 
 
 class PantryItemBase(BaseModel):
-    name: str
+    name: str = Field(..., max_length=100)
     quantity: float
-    unit: str
-    expiry_date: Optional[date] = None
+    unit: str = Field(..., max_length=20)
+    expiry_date: Optional[Date_] = None
 
 
 class PantryItemCreate(PantryItemBase):
@@ -19,7 +19,7 @@ class PantryItemUpdate(BaseModel):
     name: Optional[str] = None
     quantity: Optional[float] = None
     unit: Optional[str] = None
-    expiry_date: Optional[date] = None
+    expiry_date: Optional[Date_] = None
 
 
 class PantryItem(PantryItemBase):
@@ -33,7 +33,7 @@ class NutritionLogBase(BaseModel):
     protein: float
     carbs: float
     fat: float
-    date: Optional[date] = None
+    date: Optional[Date_] = None
 
 
 class NutritionLogCreate(BaseModel):
@@ -42,17 +42,17 @@ class NutritionLogCreate(BaseModel):
     protein: float
     carbs: float
     fat: float
-    date: Optional[date] = None
+    date: Optional[Date_] = None
 
 
 class NutritionLog(NutritionLogBase):
     id: str
-    date: date  # Override to require a date type on read
+    date: Date_  # Override to require a date type on read
 
 
 class RecipeRequest(BaseModel):
-    preferences: str = ""
-    time_of_day: str = ""
+    preferences: str = Field("", max_length=500)
+    time_of_day: str = Field("", max_length=100)
 
 
 class RecipeResponse(BaseModel):
@@ -117,7 +117,7 @@ class RecipeResponse(BaseModel):
 
 
 class NutritionAnalysisRequest(BaseModel):
-    meal_description: str
+    meal_description: str = Field(..., max_length=1000)
 
 
 class NutritionSummaryResponse(BaseModel):

@@ -183,7 +183,7 @@ const PantryPage: React.FC = () => {
                 <div className="glass-panel animate-slide-up" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderTop: '3px solid var(--accent-primary)' }}>
                     <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem' }}>Add New Item</h3>
                     <form onSubmit={handleAddItem}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: '0.75rem', alignItems: 'end' }}>
+                        <div className="add-item-form-grid">
                             <div>
                                 <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Name</label>
                                 <input type="text" className="input-glass" placeholder="e.g. Almond Milk" required value={newItemParams.name} onChange={e => setNewItemParams({ ...newItemParams, name: e.target.value })} />
@@ -209,7 +209,7 @@ const PantryPage: React.FC = () => {
             )}
 
             {/* Main layout: cards + right panel */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '1.5rem', alignItems: 'start' }}>
+            <div className="pantry-main-grid">
 
                 {/* Item Cards Grid */}
                 <div>

@@ -1,11 +1,15 @@
+import logging
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from typing import List
 
 from firestore_db import get_firestore
 from dependencies import get_current_user
 import schemas
 from agents import nutrition_agent
+from limiter import limiter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["nutrition"])
 
@@ -17,9 +21,17 @@ def _doc_to_log(doc) -> dict:
 
 
 @router.get("/nutrition", response_model=List[schemas.NutritionLog])
-def get_nutrition_logs(db=Depends(get_firestore), user=Depends(get_current_user)):
+def get_nutrition_logs(
+    db=Depends(get_firestore),
+    user=Depends(get_current_user),
+    limit: int = Query(200, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     uid = user["uid"]
-    docs = db.collection("users").document(uid).collection("nutrition_logs").stream()
+    docs = (
+        db.collection("users").document(uid).collection("nutrition_logs")
+        .limit(limit).offset(offset).stream()
+    )
     return [_doc_to_log(doc) for doc in docs]
 
 
@@ -55,11 +67,17 @@ def delete_nutrition_log(log_id: str, db=Depends(get_firestore), user=Depends(ge
 
 
 @router.post("/agents/nutrition/analyze", response_model=schemas.NutritionLog)
-def analyze_and_log_meal(request: schemas.NutritionAnalysisRequest, db=Depends(get_firestore), user=Depends(get_current_user)):
+@limiter.limit("20/minute")
+def analyze_and_log_meal(
+    request: Request,  # noqa: ARG001 — required by slowapi for rate limiting
+    body: schemas.NutritionAnalysisRequest,
+    db=Depends(get_firestore),
+    user=Depends(get_current_user),
+):
     """Analyze natural language meal description and log nutrition."""
     uid = user["uid"]
     try:
-        nutrition_data = nutrition_agent.analyze_meal(request.meal_description)
+        nutrition_data = nutrition_agent.analyze_meal(body.meal_description)
         data = {
             "meal_name": nutrition_data.get("meal_name", "Unknown Meal"),
             "calories": nutrition_data.get("calories", 0),
@@ -72,29 +90,37 @@ def analyze_and_log_meal(request: schemas.NutritionAnalysisRequest, db=Depends(g
         return {**data, "id": doc_ref.id}
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+    except Exception:
+        logger.exception("Nutrition analysis failed for user %s", uid)
+        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")
 
 
 @router.get("/agents/nutrition/summary", response_model=schemas.NutritionSummaryResponse)
-def get_nutrition_summary(db=Depends(get_firestore), user=Depends(get_current_user)):
+@limiter.limit("10/minute")
+def get_nutrition_summary(
+    request: Request,  # noqa: ARG001 — required by slowapi for rate limiting
+    db=Depends(get_firestore),
+    user=Depends(get_current_user),
+):
     uid = user["uid"]
-    docs = db.collection("users").document(uid).collection("nutrition_logs").stream()
-    logs_list = []
-    for doc in docs:
-        d = doc.to_dict()
-        logs_list.append({
+    docs = db.collection("users").document(uid).collection("nutrition_logs").order_by("date", direction="DESCENDING").limit(100).stream()
+    logs_list = [
+        {
             "date": str(d.get("date", "")),
             "meal_name": d.get("meal_name", ""),
             "calories": d.get("calories", 0),
             "protein": d.get("protein", 0),
             "carbs": d.get("carbs", 0),
             "fat": d.get("fat", 0),
-        })
+        }
+        for doc in docs
+        for d in [doc.to_dict()]
+    ]
     try:
         summary_text = nutrition_agent.generate_health_summary(logs_list)
         return {"summary": summary_text}
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+    except Exception:
+        logger.exception("Nutrition summary failed for user %s", uid)
+        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")

@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(python -c \"import main; print\\(''Backend imports OK''\\)\")",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(.venv/Scripts/pip freeze)",
+      "Bash(pip freeze)",
+      "Bash(.venv/Scripts/pip show firebase-admin Pillow)",
+      "Bash(.venv/Scripts/pip install slowapi sentry-sdk pytest pytest-asyncio httpx -q)",
+      "Bash(.venv/Scripts/pytest tests/ -v)",
+      "Bash(\"C:/Users/krish/AppData/Local/Programs/Python/Python310/python.exe\" -m pip install sentry-sdk[fastapi] slowapi --quiet)",
+      "Bash(\"C:/Users/krish/AppData/Local/Programs/Python/Python310/python.exe\" -c \"import sentry_sdk; import slowapi; print\\(''OK''\\)\")",
+      "Bash(\"C:/Users/krish/AppData/Local/Programs/Python/Python310/python.exe\" -c \":*)",
+      "Bash(ls -la frontend/src/*.tsx frontend/src/*.ts)",
+      "Bash(ls -la *.py)",
+      "Bash(python -c \":*)"
     ]
   }
 }

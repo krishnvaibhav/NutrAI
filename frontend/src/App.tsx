@@ -9,6 +9,7 @@ import VisionPage from './pages/VisionPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Account from './pages/Account';
+import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
@@ -29,6 +30,13 @@ function App() {
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Pantry', path: '/pantry', icon: Package },
@@ -42,8 +50,8 @@ function App() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', width: '100%', background: 'var(--bg-primary)' }}>
-      {/* Sidebar */}
-      {!isAuthPage && currentUser && (
+      {/* Sidebar — desktop only */}
+      {!isAuthPage && currentUser && !isMobile && (
         <aside style={{
           width: '220px',
           minWidth: '220px',
@@ -139,7 +147,7 @@ function App() {
         </aside>
       )}
 
-      {/* Main Content — centered */}
+      {/* Main Content */}
       <main style={{
         flex: 1,
         overflowY: 'auto',
@@ -148,6 +156,7 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        paddingBottom: isMobile && !isAuthPage && currentUser ? '64px' : undefined,
       }}>
         <div className="animate-fade-in" style={{ width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <Routes>
@@ -159,9 +168,42 @@ function App() {
             <Route path="/nutrition" element={<ProtectedRoute><NutritionPage /></ProtectedRoute>} />
             <Route path="/vision" element={<ProtectedRoute><VisionPage /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </main>
+      {/* Mobile bottom nav */}
+      {!isAuthPage && currentUser && isMobile && (
+        <nav style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          height: '60px',
+          background: 'var(--bg-secondary)',
+          borderTop: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center',
+          zIndex: 100,
+          boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
+        }}>
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  gap: '2px', flex: 1, padding: '0.4rem 0.25rem',
+                  color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                  textDecoration: 'none',
+                }}
+              >
+                <Icon size={20} />
+                <span style={{ fontSize: '0.58rem', fontWeight: isActive ? 600 : 400 }}>{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }
