@@ -55,9 +55,10 @@ export default function Account() {
       setPwError('New password must be at least 6 characters.');
       return;
     }
+    if (!currentUser) return;
     setPwLoading(true);
     try {
-      const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+      const credential = EmailAuthProvider.credential(currentUser.email!, currentPassword);
       await reauthenticateWithCredential(currentUser, credential);
       await updatePassword(currentUser, newPassword);
       setPwSuccess('Password updated successfully.');
