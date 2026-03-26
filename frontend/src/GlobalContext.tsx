@@ -38,7 +38,7 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
 export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-        { role: 'assistant', content: "Hi! I'm NutriAI. Tell me what you ate to log nutrition, ask for a recipe, or upload a photo of your fridge to update your pantry!" }
+        { role: 'assistant', content: "Hi! I'm PantryAI. Tell me what you ate to log nutrition, ask for a recipe, or upload a photo of your fridge to update your pantry!" }
     ]);
     const [healthSummary, setHealthSummary] = useState<string>('');
     const [lastLogCount, setLastLogCount] = useState<number>(-1); // -1 means never fetched

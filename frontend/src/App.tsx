@@ -20,12 +20,12 @@ function App() {
 
   // Theme management
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('nutriai-theme') as 'light' | 'dark') || 'light';
+    return (localStorage.getItem('pantryai-theme') as 'light' | 'dark') || 'light';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('nutriai-theme', theme);
+    localStorage.setItem('pantryai-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
@@ -77,7 +77,7 @@ function App() {
               </div>
               <div>
                 <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--accent-primary)', lineHeight: 1.1 }}>
-                  NutriAI
+                  PantryAI
                 </div>
                 <div style={{ fontSize: '0.58rem', color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '1px' }}>
                   Verdant Intelligence

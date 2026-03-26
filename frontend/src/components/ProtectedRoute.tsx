@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <AILoader message="Loading NutriAI" variant="default" />
+        <AILoader message="Loading PantryAI" variant="default" />
       </div>
     );
   }

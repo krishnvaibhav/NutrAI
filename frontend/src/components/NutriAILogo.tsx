@@ -3,10 +3,10 @@ interface Props {
 }
 
 /**
- * NutriAI brand logo — rounded-square badge with a leaf + AI sparkle.
+ * PantryAI brand logo — rounded-square badge with a leaf + AI sparkle.
  * The green gradient is baked in, so no wrapper div needed.
  */
-export default function NutriAILogo({ size = 40 }: Props) {
+export default function PantryAILogo({ size = 40 }: Props) {
   return (
     <svg
       width={size}
@@ -17,7 +17,7 @@ export default function NutriAILogo({ size = 40 }: Props) {
     >
       <defs>
         <linearGradient
-          id="nutriai-bg"
+          id="pantryai-bg"
           x1="0" y1="0" x2="40" y2="40"
           gradientUnits="userSpaceOnUse"
         >
@@ -27,7 +27,7 @@ export default function NutriAILogo({ size = 40 }: Props) {
       </defs>
 
       {/* Badge background */}
-      <rect width="40" height="40" rx="11" fill="url(#nutriai-bg)" />
+      <rect width="40" height="40" rx="11" fill="url(#pantryai-bg)" />
 
       {/* Leaf body — diagonal, tip upper-right */}
       <path

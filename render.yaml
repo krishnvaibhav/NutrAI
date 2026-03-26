@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: nutriai-api
+    name: pantryai-api
     env: python
     region: oregon
     plan: free

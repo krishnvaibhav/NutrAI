@@ -98,7 +98,7 @@ export default function Signup() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <ChefHat size={40} color="var(--accent-primary)" style={{ marginBottom: '0.75rem' }} />
-          <h1 className="text-gradient" style={{ fontSize: '1.75rem', margin: 0 }}>NutriAI</h1>
+          <h1 className="text-gradient" style={{ fontSize: '1.75rem', margin: 0 }}>PantryAI</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Create your account</p>
         </div>
 

@@ -31,7 +31,7 @@ if SENTRY_DSN:
     logger.info("Sentry initialised")
 
 # ── App ──────────────────────────────────────────────────────────────────────
-app = FastAPI(title="NutriAI API")
+app = FastAPI(title="PantryAI API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
