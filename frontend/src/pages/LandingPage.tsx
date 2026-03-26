@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext';
 /* ── palette ─────────────────────────────────────────────────────────── */
 const HERO_BG = '#2C3B2D';   // muted sage hero
 const DARK = '#0C1912';   // deep dark (CTA / footer)
-const DARK_CARD = 'rgba(255,255,255,0.07)';
 const GREEN = '#2D4A3E';
 const GREEN_MID = '#3D6B5A';
 const GREEN_LIGHT = '#5BB88A';

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { Crown, LogOut, Lock, Bell, CheckCircle, MessageSquare } from 'lucide-react';
 import { auth } from '../firebase';
 import { apiCall } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
 
 const PRO_ENABLED = import.meta.env.VITE_PRO_ENABLED === 'true';
 
