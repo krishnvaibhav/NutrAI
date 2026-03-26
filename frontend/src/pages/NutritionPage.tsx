@@ -129,7 +129,7 @@ const NutritionPage: React.FC = () => {
                 <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Sparkles size={18} color="var(--accent-secondary)" /> Quick Add Meal
                 </h2>
-                <form onSubmit={handleManualLog} style={{ display: 'flex', gap: '1rem' }}>
+                <form onSubmit={handleManualLog} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     <input
                         type="text"
                         className="input-glass"
@@ -175,32 +175,32 @@ const NutritionPage: React.FC = () => {
             </div>
 
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Recent Logs</h2>
-            <div className="glass-panel" style={{ overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="glass-panel" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
                         <tr style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                            <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Date</th>
-                            <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Meal</th>
-                            <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Calories</th>
-                            <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Macros (P/C/F)</th>
-                            <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.9rem' }}></th>
+                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Date</th>
+                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Meal</th>
+                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Calories</th>
+                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Macros (P/C/F)</th>
+                            <th style={{ padding: '0.85rem 1rem' }}></th>
                         </tr>
                     </thead>
                     <tbody>
                         {logs.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: '3rem 1.5rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No meals logged yet. Use the Quick Add form above!</td>
+                                <td colSpan={5} style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No meals logged yet. Use the Quick Add form above!</td>
                             </tr>
                         ) : (
                             logs.slice().reverse().map((log, idx, reversedArr) => (
                                 <tr key={log.id} style={{ borderBottom: idx !== reversedArr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.9rem' }}>{log.date}</td>
-                                    <td style={{ padding: '1rem 1.5rem', fontWeight: 500 }}>{log.meal_name}</td>
-                                    <td style={{ padding: '1rem 1.5rem', color: 'var(--accent-primary)' }}>{Math.round(log.calories)} kcal</td>
-                                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{log.date}</td>
+                                    <td style={{ padding: '0.85rem 1rem', fontWeight: 500, fontSize: '0.9rem' }}>{log.meal_name}</td>
+                                    <td style={{ padding: '0.85rem 1rem', color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>{Math.round(log.calories)} kcal</td>
+                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                                         {Math.round(log.protein)}g / {Math.round(log.carbs)}g / {Math.round(log.fat)}g
                                     </td>
-                                    <td style={{ padding: '1rem 1.5rem' }}>
+                                    <td style={{ padding: '0.85rem 1rem' }}>
                                         <button
                                             onClick={() => handleDeleteLog(log.id)}
                                             style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}

@@ -459,3 +459,48 @@ select.glass-input {
   align-items: center;
   justify-content: center;
 }
+
+/* ===== Mobile-specific components ===== */
+
+/* Insight card (HomePage) — side-by-side on desktop, stacked on mobile */
+.insight-card-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+}
+
+/* Recipe expanded detail — side-by-side on desktop, stacked on mobile */
+.recipe-detail-grid {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.5rem;
+}
+
+/* Category chips — scrollable single row, no wrapping */
+.category-chips-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.category-chips-scroll::-webkit-scrollbar { display: none; }
+.category-chips-scroll .category-chip {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .insight-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .insight-card-image {
+    min-height: 110px !important;
+  }
+  .recipe-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

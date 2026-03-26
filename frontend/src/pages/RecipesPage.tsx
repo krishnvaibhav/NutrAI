@@ -140,7 +140,7 @@ const RecipesPage: React.FC = () => {
                             </div>
 
                             {isExpanded && (
-                                <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '2rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem' }}
+                                <div className="recipe-detail-grid"
                                     onClick={e => e.stopPropagation()}>
                                     <div>
                                         <h3 style={{ fontSize: '1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Missing Ingredients</h3>

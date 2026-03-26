@@ -145,9 +145,9 @@ const PantryPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Search + Filters */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: '1', minWidth: '200px' }}>
+            {/* Search + Add row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div style={{ position: 'relative', flex: '1' }}>
                     <Search size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input
                         type="text"
@@ -158,17 +158,6 @@ const PantryPage: React.FC = () => {
                         style={{ paddingLeft: '2.5rem', background: '#FFFFFF', border: '1px solid var(--border)' }}
                     />
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {CATEGORIES.map(cat => (
-                        <button
-                            key={cat}
-                            className={`category-chip ${activeCategory === cat ? 'active' : ''}`}
-                            onClick={() => setActiveCategory(cat)}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
                 <button
                     className="btn-primary"
                     onClick={() => setShowAddForm(v => !v)}
@@ -176,6 +165,19 @@ const PantryPage: React.FC = () => {
                 >
                     <Plus size={16} /> Add Item
                 </button>
+            </div>
+
+            {/* Category chips — horizontally scrollable on mobile */}
+            <div className="category-chips-scroll" style={{ marginBottom: '1.5rem' }}>
+                {CATEGORIES.map(cat => (
+                    <button
+                        key={cat}
+                        className={`category-chip ${activeCategory === cat ? 'active' : ''}`}
+                        onClick={() => setActiveCategory(cat)}
+                    >
+                        {cat}
+                    </button>
+                ))}
             </div>
 
             {/* Add Item Form (collapsible) */}

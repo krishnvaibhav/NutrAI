@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   signInWithEmailAndPassword,
   signInWithPopup,
+  sendPasswordResetEmail,
   GoogleAuthProvider,
 } from 'firebase/auth';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, MailCheck } from 'lucide-react';
 import { auth } from '../firebase';
 
 const friendly = (err: unknown) => {
@@ -29,6 +30,13 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Forgot password state
+  const [showForgot, setShowForgot] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +65,74 @@ export default function Login() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError('');
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetSent(true);
+    } catch (err) {
+      setResetError(friendly(err));
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  // ── Forgot password panel ──────────────────────────────────────────────────
+  if (showForgot) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <div className="glass-panel" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem', textAlign: 'center' }}>
+          {resetSent ? (
+            <>
+              <MailCheck size={48} color="var(--accent-primary)" style={{ marginBottom: '1rem' }} />
+              <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Check your email</h2>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                We sent a password reset link to <strong>{resetEmail}</strong>.<br />
+                The link expires in 1 hour.
+              </p>
+              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { setShowForgot(false); setResetSent(false); setResetEmail(''); }}>
+                Back to Sign In
+              </button>
+            </>
+          ) : (
+            <>
+              <ChefHat size={40} color="var(--accent-primary)" style={{ marginBottom: '0.75rem' }} />
+              <h2 style={{ fontSize: '1.4rem', marginBottom: '0.25rem' }}>Reset your password</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                Enter your email and we'll send you a reset link.
+              </p>
+
+              {resetError && (
+                <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', color: 'var(--accent-danger)', fontSize: '0.875rem', marginBottom: '1rem', textAlign: 'left' }}>
+                  {resetError}
+                </div>
+              )}
+
+              <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
+                <div>
+                  <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.4rem' }}>Email</label>
+                  <input type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required className="glass-input" placeholder="you@example.com" />
+                </div>
+                <button type="submit" className="btn-primary" disabled={resetLoading} style={{ width: '100%', justifyContent: 'center' }}>
+                  {resetLoading ? 'Sending…' : 'Send Reset Link'}
+                </button>
+              </form>
+
+              <button
+                onClick={() => { setShowForgot(false); setResetError(''); }}
+                style={{ marginTop: '1rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem' }}
+              >
+                ← Back to Sign In
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div className="glass-panel" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem' }}>
@@ -82,7 +158,16 @@ export default function Login() {
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="glass-input" placeholder="you@example.com" />
           </div>
           <div>
-            <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.4rem' }}>Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
+              <label style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Password</label>
+              <button
+                type="button"
+                onClick={() => { setShowForgot(true); setResetEmail(email); setResetError(''); }}
+                style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: 0 }}
+              >
+                Forgot password?
+              </button>
+            </div>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="glass-input" placeholder="••••••••" />
           </div>
           <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '0.5rem', width: '100%', justifyContent: 'center' }}>

@@ -135,9 +135,9 @@ const HomePage: React.FC = () => {
                 {/* AI Insight Panel */}
                 {!dismissedInsight && (
                     <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', background: 'var(--accent-primary)' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr' }}>
+                        <div className="insight-card-grid">
                             {/* Food image placeholder */}
-                            <div style={{ background: 'rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '180px' }}>
+                            <div className="insight-card-image" style={{ background: 'rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '180px' }}>
                                 <ChefHat size={64} color="rgba(255,255,255,0.3)" />
                             </div>
                             {/* Insight text */}
