@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Account from './pages/Account';
 import NotFoundPage from './pages/NotFoundPage';
+import LandingPage from './pages/LandingPage';
+import ContactPage from './pages/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
@@ -38,7 +40,7 @@ function App() {
   }, []);
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/home', icon: LayoutDashboard },
     { name: 'Pantry', path: '/pantry', icon: Package },
     { name: 'Health', path: '/nutrition', icon: Activity },
     { name: 'Recipes', path: '/recipes', icon: ChefHat },
@@ -46,7 +48,7 @@ function App() {
     { name: 'Account', path: '/account', icon: User },
   ];
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const isAuthPage = ['/', '/login', '/signup', '/contact'].includes(location.pathname);
   const showChrome = !isAuthPage && !!currentUser;
 
   return (
@@ -155,14 +157,16 @@ function App() {
       }}>
         <div className="animate-fade-in" style={{ width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
             <Route path="/pantry" element={<ProtectedRoute><PantryPage /></ProtectedRoute>} />
             <Route path="/recipes" element={<ProtectedRoute><RecipesPage /></ProtectedRoute>} />
             <Route path="/nutrition" element={<ProtectedRoute><NutritionPage /></ProtectedRoute>} />
             <Route path="/vision" element={<ProtectedRoute><VisionPage /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>

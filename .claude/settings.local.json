@@ -13,7 +13,8 @@
       "Bash(\"C:/Users/krish/AppData/Local/Programs/Python/Python310/python.exe\" -c \":*)",
       "Bash(ls -la frontend/src/*.tsx frontend/src/*.ts)",
       "Bash(ls -la *.py)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(npm install @emailjs/browser --save)"
     ]
   }
 }

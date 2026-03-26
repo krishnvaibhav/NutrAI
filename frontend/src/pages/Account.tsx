@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { Crown, LogOut, Lock, Bell, CheckCircle } from 'lucide-react';
+import { Crown, LogOut, Lock, Bell, CheckCircle, MessageSquare } from 'lucide-react';
 import { auth } from '../firebase';
 import { apiCall } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const PRO_ENABLED = import.meta.env.VITE_PRO_ENABLED === 'true';
 
@@ -206,6 +207,21 @@ export default function Account() {
           </button>
         </form>
       </div>}
+
+      {/* Feedback / Report */}
+      <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <h3 style={{ margin: '0 0 0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <MessageSquare size={20} color="var(--accent-primary)" />
+          Feedback &amp; Support
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
+          Found a bug or have a suggestion? We read every message personally.
+        </p>
+        <Link to="/contact" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+          <MessageSquare size={15} />
+          Report an Issue / Send Feedback
+        </Link>
+      </div>
 
       {/* Sign Out */}
       <button

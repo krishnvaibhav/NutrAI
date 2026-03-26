@@ -44,7 +44,7 @@ export default function Login() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       setError(friendly(err));
     } finally {
@@ -57,7 +57,7 @@ export default function Login() {
     setLoading(true);
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       setError(friendly(err));
     } finally {

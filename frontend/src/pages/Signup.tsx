@@ -53,7 +53,7 @@ export default function Signup() {
     setLoading(true);
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       setError(friendly(err));
     } finally {
