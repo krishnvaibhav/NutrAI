@@ -1,0 +1,12 @@
+frontend/
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.git/
+.gitignore
+*.md
+render.yaml
+railway.json

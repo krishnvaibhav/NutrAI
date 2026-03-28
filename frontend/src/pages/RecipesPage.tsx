@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChefHat, Sparkles, Flame, Activity, ChevronDown, ChevronUp, Users, DollarSign, ShoppingCart } from 'lucide-react';
+import { ChefHat, Sparkles, Flame, Activity, ChevronDown, ChevronUp, Users, DollarSign, ShoppingCart, CheckCircle } from 'lucide-react';
 import AILoader from '../components/AILoader';
 import { useGlobalContext } from '../GlobalContext';
 import { apiCall } from '../api';
@@ -164,18 +164,28 @@ const RecipesPage: React.FC = () => {
                                                         <li key={i}>{item}</li>
                                                     ))}
                                                 </ul>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'flex-start' }}>
                                                     <button
                                                         className="btn-primary"
-                                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                                            fontSize: '0.85rem', padding: '0.5rem 1rem',
+                                                            background: addedRecipe === recipe.name ? '#166534' : undefined,
+                                                            transition: 'background 0.2s',
+                                                        }}
                                                         onClick={() => handleAddToList(recipe.name, recipe.missing_ingredients)}
                                                     >
-                                                        <ShoppingCart size={15} />
-                                                        {addedRecipe === recipe.name ? 'Added!' : 'Add to Shopping List'}
+                                                        <CheckCircle size={15} />
+                                                        {addedRecipe === recipe.name ? '✓ Added to list!' : 'Add to Shopping List'}
                                                     </button>
                                                     {addedRecipe === recipe.name && (
-                                                        <Link to="/shopping" style={{ fontSize: '0.82rem', color: 'var(--accent-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                                            View list →
+                                                        <Link to="/shopping" style={{
+                                                            fontSize: '0.82rem', color: '#fff', textDecoration: 'none',
+                                                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                                                            background: 'var(--accent-secondary)', padding: '0.35rem 0.8rem',
+                                                            borderRadius: '999px', fontWeight: 600,
+                                                        }}>
+                                                            <ShoppingCart size={13} /> View Shopping List
                                                         </Link>
                                                     )}
                                                 </div>
@@ -207,9 +217,9 @@ const RecipesPage: React.FC = () => {
             {uncheckedCount > 0 && (
                 <Link
                     to="/shopping"
-                    style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1000, background: 'var(--accent-primary)', borderRadius: '999px', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', fontWeight: 600, fontSize: '0.875rem', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', textDecoration: 'none' }}
+                    style={{ position: 'fixed', bottom: 'calc(60px + 1rem)', right: '1rem', zIndex: 1000, background: 'var(--accent-primary)', borderRadius: '999px', padding: '0.65rem 1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', fontWeight: 600, fontSize: '0.875rem', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', textDecoration: 'none' }}
                 >
-                    <ShoppingCart size={18} />
+                    <ShoppingCart size={17} />
                     {uncheckedCount} item{uncheckedCount !== 1 ? 's' : ''} to buy
                 </Link>
             )}
