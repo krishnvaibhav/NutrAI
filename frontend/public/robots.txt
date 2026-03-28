@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /contact
+
+# Keep authenticated pages out of search index
+Disallow: /home
+Disallow: /pantry
+Disallow: /recipes
+Disallow: /nutrition
+Disallow: /vision
+Disallow: /account
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://www.pantryai.app/sitemap.xml

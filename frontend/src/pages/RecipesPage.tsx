@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChefHat, Sparkles, Flame, Activity, ChevronDown, ChevronUp, Users, DollarSign } from 'lucide-react';
+import { ChefHat, Sparkles, Flame, Activity, ChevronDown, ChevronUp, Users, DollarSign, ShoppingCart } from 'lucide-react';
 import AILoader from '../components/AILoader';
 import { useGlobalContext } from '../GlobalContext';
 import { apiCall } from '../api';
+import { useShoppingList } from '../hooks/useShoppingList';
 
 const RecipesPage: React.FC = () => {
     const { recipes, setRecipes, recipePreferences, setRecipePreferences, recipeTimeOfDay, setRecipeTimeOfDay, expandedRecipeIdx, setExpandedRecipeIdx } = useGlobalContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [upgradeMsg, setUpgradeMsg] = useState('');
+    const [addedRecipe, setAddedRecipe] = useState<string | null>(null);
+    const { addItems, uncheckedCount } = useShoppingList();
+
+    const handleAddToList = (recipeName: string, ingredients: string[]) => {
+        addItems(recipeName, ingredients);
+        setAddedRecipe(recipeName);
+        setTimeout(() => setAddedRecipe(null), 2500);
+    };
 
     const handleSuggest = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -149,11 +158,28 @@ const RecipesPage: React.FC = () => {
                                                 <Sparkles size={14} /> You have everything!
                                             </p>
                                         ) : (
-                                            <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                                                {recipe.missing_ingredients.map((item, i) => (
-                                                    <li key={i}>{item}</li>
-                                                ))}
-                                            </ul>
+                                            <>
+                                                <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem' }}>
+                                                    {recipe.missing_ingredients.map((item, i) => (
+                                                        <li key={i}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                                    <button
+                                                        className="btn-primary"
+                                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+                                                        onClick={() => handleAddToList(recipe.name, recipe.missing_ingredients)}
+                                                    >
+                                                        <ShoppingCart size={15} />
+                                                        {addedRecipe === recipe.name ? 'Added!' : 'Add to Shopping List'}
+                                                    </button>
+                                                    {addedRecipe === recipe.name && (
+                                                        <Link to="/shopping" style={{ fontSize: '0.82rem', color: 'var(--accent-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                            View list →
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                     <div>
@@ -176,6 +202,17 @@ const RecipesPage: React.FC = () => {
                     );
                 })}
             </div>
+
+            {/* Floating badge → Shopping page */}
+            {uncheckedCount > 0 && (
+                <Link
+                    to="/shopping"
+                    style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1000, background: 'var(--accent-primary)', borderRadius: '999px', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', fontWeight: 600, fontSize: '0.875rem', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', textDecoration: 'none' }}
+                >
+                    <ShoppingCart size={18} />
+                    {uncheckedCount} item{uncheckedCount !== 1 ? 's' : ''} to buy
+                </Link>
+            )}
         </div>
     );
 };

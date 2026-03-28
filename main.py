@@ -39,10 +39,13 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
 IS_DEV = os.getenv("ENV", "development") == "development"
 
+LOCAL_IP = os.getenv("LOCAL_IP", "")  # e.g. 192.168.1.5 — for LAN device testing
+
 ALLOWED_ORIGINS = list(filter(None, [
     FRONTEND_URL,
     "http://localhost:5173" if IS_DEV else None,
     "http://127.0.0.1:5173" if IS_DEV else None,
+    f"http://{LOCAL_IP}:5173" if IS_DEV and LOCAL_IP else None,
 ]))
 
 app.add_middleware(

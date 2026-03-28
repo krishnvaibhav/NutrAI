@@ -79,6 +79,8 @@ body {
   flex-direction: column;
   overflow-x: hidden;
   background-color: var(--bg-primary);
+  -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
+  overscroll-behavior-y: none; /* prevent rubber-band bounce interfering with scroll */
 }
 
 #root {
@@ -321,7 +323,9 @@ select.glass-input {
 /* ===== Responsive: Mobile (≤ 768px) ===== */
 @media (max-width: 768px) {
   .page-content {
-    padding: 1.25rem 1rem 1rem;
+    padding: 1.25rem 0.875rem 1rem;
+    width: 100%;
+    max-width: 100%;
   }
 
   .home-stat-grid {

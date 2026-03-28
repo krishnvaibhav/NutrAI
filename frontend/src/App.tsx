@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ChefHat, Activity, User, ScanLine, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Package, ChefHat, Activity, User, ScanLine, Sun, Moon, ShoppingCart } from 'lucide-react';
 import HomePage from './pages/HomePage';
 import PantryPage from './pages/PantryPage';
 import RecipesPage from './pages/RecipesPage';
@@ -12,6 +12,7 @@ import Account from './pages/Account';
 import NotFoundPage from './pages/NotFoundPage';
 import LandingPage from './pages/LandingPage';
 import ContactPage from './pages/ContactPage';
+import ShoppingPage from './pages/ShoppingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
@@ -47,6 +48,7 @@ function App() {
     { name: 'Pantry', path: '/pantry', icon: Package },
     { name: 'Health', path: '/nutrition', icon: Activity },
     { name: 'Recipes', path: '/recipes', icon: ChefHat },
+    { name: 'Shopping', path: '/shopping', icon: ShoppingCart },
     { name: 'Vision', path: '/vision', icon: ScanLine },
     { name: 'Account', path: '/account', icon: User },
   ];
@@ -149,8 +151,9 @@ function App() {
       {/* ── Main content ────────────────────────────────────────────────── */}
       <main style={{
         flex: 1,
-        overflowY: 'auto',
-        height: '100vh',
+        minWidth: 0,          /* prevent flex item overflowing its container */
+        minHeight: '100vh',
+        overflow: 'hidden',   /* clip any child that exceeds viewport width */
         background: 'var(--bg-primary)',
         display: 'flex',
         flexDirection: 'column',
@@ -169,6 +172,7 @@ function App() {
             <Route path="/nutrition" element={<ProtectedRoute><NutritionPage /></ProtectedRoute>} />
             <Route path="/vision" element={<ProtectedRoute><VisionPage /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+            <Route path="/shopping" element={<ProtectedRoute><ShoppingPage /></ProtectedRoute>} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
