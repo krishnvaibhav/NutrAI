@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Target, Sparkles, Trash2 } from 'lucide-react';
+import { Activity, Sparkles, Trash2 } from 'lucide-react';
 import AILoader from '../components/AILoader';
 import { useGlobalContext } from '../GlobalContext';
 import { apiCall } from '../api';
@@ -16,7 +16,7 @@ interface NutritionLog {
 }
 
 const NutritionPage: React.FC = () => {
-    const { healthSummary, setHealthSummary, lastLogCount, setLastLogCount } = useGlobalContext();
+    const { lastLogCount, setLastLogCount } = useGlobalContext();
     const [logs, setLogs] = useState<NutritionLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [mealDescription, setMealDescription] = useState('');
@@ -36,11 +36,10 @@ const NutritionPage: React.FC = () => {
         setMealDescription('');
         try {
             const newLog: NutritionLog = await apiCall('POST', '/agents/nutrition/analyze', { meal_description: desc });
-            // Update UI immediately with the returned log — no refetch needed
             setLogs(prev => [...prev, newLog]);
             setLastLogCount(lastLogCount + 1);
         } catch (err: unknown) {
-            setMealDescription(desc); // restore input on error
+            setMealDescription(desc);
             const e = err as Error & { status?: number };
             if (e.status === 403) setUpgradeMsg(e.message);
             else console.error(e);
@@ -62,12 +61,7 @@ const NutritionPage: React.FC = () => {
         try {
             const fetchedLogs = await apiCall('GET', '/nutrition');
             setLogs(fetchedLogs);
-
-            if (fetchedLogs.length !== lastLogCount) {
-                const summaryData = await apiCall('GET', '/agents/nutrition/summary');
-                setHealthSummary(summaryData.summary);
-                setLastLogCount(fetchedLogs.length);
-            }
+            setLastLogCount(fetchedLogs.length);
         } catch (e) {
             console.error(e);
         } finally {
@@ -75,7 +69,7 @@ const NutritionPage: React.FC = () => {
         }
     };
 
-    const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local timezone
+    const todayStr = new Date().toLocaleDateString('en-CA');
     const todayLogs = logs.filter(log => log.date === todayStr);
     const totalCalories = todayLogs.reduce((acc, log) => acc + log.calories, 0);
     const totalProtein = todayLogs.reduce((acc, log) => acc + log.protein, 0);
@@ -89,7 +83,7 @@ const NutritionPage: React.FC = () => {
                     <Activity size={36} color="var(--accent-warning)" />
                     Health & Macros
                 </h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Track your daily intake and receive personalized health insights.</p>
+                <p style={{ color: 'var(--text-secondary)' }}>Track your daily intake and get a breakdown of your macros.</p>
             </header>
 
             {upgradeMsg && (
@@ -104,54 +98,33 @@ const NutritionPage: React.FC = () => {
                 </div>
             )}
 
-            {/* AI Summary Banner */}
-            <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', borderLeft: '4px solid var(--accent-warning)', background: 'linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%)' }}>
-                <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-warning)' }}>
-                    <Target size={18} /> AI Health Insight
-                </h2>
-                {(!healthSummary && loading) ? (
-                    <AILoader message="Analyzing your nutrition" variant="nutrition" />
-                ) : (
-                    <>
-                        <p style={{ color: 'var(--text-primary)', lineHeight: 1.6, margin: 0 }}>
-                            {healthSummary || "No health summary yet. Start logging your meals to get AI insights!"}
-                        </p>
-                        {(loading && healthSummary) && (
-                            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.7 }}>
-                                <span className="ai-dot" style={{ animationDelay: '0s' }}>.</span>
-                                <span className="ai-dot" style={{ animationDelay: '0.2s' }}>.</span>
-                                <span className="ai-dot" style={{ animationDelay: '0.4s' }}>.</span>
-                                <span style={{ marginLeft: '0.25rem' }}>Syncing logs</span>
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-
             {/* Quick Add Meal Form */}
             <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2.5rem' }}>
                 <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Sparkles size={18} color="var(--accent-secondary)" /> Quick Add Meal
                 </h2>
-                <form onSubmit={handleManualLog} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <input
-                        type="text"
-                        className="input-glass"
-                        placeholder="What did you eat? (e.g. 2 boiled eggs and a coffee)"
-                        value={mealDescription}
-                        onChange={e => setMealDescription(e.target.value)}
-                        disabled={loggingMeal}
-                        style={{ flex: 1 }}
-                    />
-                    <button
-                        type="submit"
-                        className="btn-primary"
-                        disabled={loggingMeal || !mealDescription.trim()}
-                        style={{ minWidth: '120px' }}
-                    >
-                        {loggingMeal ? "Analyzing..." : "Log Meal"}
-                    </button>
-                </form>
+                {loggingMeal ? (
+                    <AILoader message="Analyzing your meal" variant="nutrition" />
+                ) : (
+                    <form onSubmit={handleManualLog} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <input
+                            type="text"
+                            className="input-glass"
+                            placeholder="What did you eat? (e.g. 2 boiled eggs and a coffee)"
+                            value={mealDescription}
+                            onChange={e => setMealDescription(e.target.value)}
+                            style={{ flex: 1 }}
+                        />
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                            disabled={!mealDescription.trim()}
+                            style={{ minWidth: '120px' }}
+                        >
+                            Log Meal
+                        </button>
+                    </form>
+                )}
             </div>
 
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Today's Progress</h2>
@@ -179,46 +152,52 @@ const NutritionPage: React.FC = () => {
             </div>
 
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Recent Logs</h2>
-            <div className="glass-panel" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Date</th>
-                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Meal</th>
-                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Calories</th>
-                            <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Macros (P/C/F)</th>
-                            <th style={{ padding: '0.85rem 1rem' }}></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {logs.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No meals logged yet. Use the Quick Add form above!</td>
+            {loading ? (
+                <div className="glass-panel" style={{ padding: '2rem' }}>
+                    <AILoader message="Loading your nutrition logs" variant="nutrition" />
+                </div>
+            ) : (
+                <div className="glass-panel" style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Date</th>
+                                <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Meal</th>
+                                <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Calories</th>
+                                <th style={{ padding: '0.85rem 1rem', fontWeight: 500, color: 'var(--text-secondary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Macros (P/C/F)</th>
+                                <th style={{ padding: '0.85rem 1rem' }}></th>
                             </tr>
-                        ) : (
-                            logs.slice().reverse().map((log, idx, reversedArr) => (
-                                <tr key={log.id} style={{ borderBottom: idx !== reversedArr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{log.date}</td>
-                                    <td style={{ padding: '0.85rem 1rem', fontWeight: 500, fontSize: '0.9rem' }}>{log.meal_name}</td>
-                                    <td style={{ padding: '0.85rem 1rem', color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>{Math.round(log.calories)} kcal</td>
-                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                                        {Math.round(log.protein)}g / {Math.round(log.carbs)}g / {Math.round(log.fat)}g
-                                    </td>
-                                    <td style={{ padding: '0.85rem 1rem' }}>
-                                        <button
-                                            onClick={() => handleDeleteLog(log.id)}
-                                            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
-                                            title="Delete log"
-                                        >
-                                            <Trash2 size={15} />
-                                        </button>
-                                    </td>
+                        </thead>
+                        <tbody>
+                            {logs.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No meals logged yet. Use the Quick Add form above!</td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : (
+                                logs.slice().reverse().map((log, idx, arr) => (
+                                    <tr key={log.id} style={{ borderBottom: idx !== arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                                        <td style={{ padding: '0.85rem 1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{log.date}</td>
+                                        <td style={{ padding: '0.85rem 1rem', fontWeight: 500, fontSize: '0.9rem' }}>{log.meal_name}</td>
+                                        <td style={{ padding: '0.85rem 1rem', color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>{Math.round(log.calories)} kcal</td>
+                                        <td style={{ padding: '0.85rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                                            {Math.round(log.protein)}g / {Math.round(log.carbs)}g / {Math.round(log.fat)}g
+                                        </td>
+                                        <td style={{ padding: '0.85rem 1rem' }}>
+                                            <button
+                                                onClick={() => handleDeleteLog(log.id)}
+                                                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
+                                                title="Delete log"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

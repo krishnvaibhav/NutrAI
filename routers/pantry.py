@@ -1,7 +1,9 @@
+import io
 import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status, UploadFile, File
 from typing import List
+from PIL import Image
 
 from firestore_db import get_firestore
 from dependencies import get_current_user, require_pro
@@ -87,8 +89,18 @@ async def scan_receipt_or_fridge(
     if len(image_bytes) > MAX_IMAGE_BYTES:
         raise HTTPException(status_code=413, detail="Image must be smaller than 10 MB.")
 
+    # Compress large images to reduce API latency
     try:
-        items = vision_agent.parse_fridge_image(image_bytes, file.content_type)
+        img = Image.open(io.BytesIO(image_bytes))
+        img.thumbnail((1024, 1024))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85)
+        image_bytes = buf.getvalue()
+    except Exception:
+        pass  # use original bytes if PIL fails
+
+    try:
+        items = vision_agent.parse_fridge_image(image_bytes, "image/jpeg")
         return items
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))

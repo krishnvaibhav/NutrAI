@@ -94,33 +94,3 @@ def analyze_and_log_meal(
         logger.exception("Nutrition analysis failed for user %s", uid)
         raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")
 
-
-@router.get("/agents/nutrition/summary", response_model=schemas.NutritionSummaryResponse)
-@limiter.limit("10/minute")
-def get_nutrition_summary(
-    request: Request,  # noqa: ARG001 — required by slowapi for rate limiting
-    db=Depends(get_firestore),
-    user=Depends(get_current_user),
-):
-    uid = user["uid"]
-    docs = db.collection("users").document(uid).collection("nutrition_logs").order_by("date", direction="DESCENDING").limit(100).stream()
-    logs_list = [
-        {
-            "date": str(d.get("date", "")),
-            "meal_name": d.get("meal_name", ""),
-            "calories": d.get("calories", 0),
-            "protein": d.get("protein", 0),
-            "carbs": d.get("carbs", 0),
-            "fat": d.get("fat", 0),
-        }
-        for doc in docs
-        for d in [doc.to_dict()]
-    ]
-    try:
-        summary_text = nutrition_agent.generate_health_summary(logs_list)
-        return {"summary": summary_text}
-    except ValueError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    except Exception:
-        logger.exception("Nutrition summary failed for user %s", uid)
-        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")

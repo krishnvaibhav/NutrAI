@@ -140,6 +140,11 @@ class ChatResponse(BaseModel):
     extracted_data: str = ""
 
 
+class SavedRecipe(RecipeResponse):
+    id: str
+    saved_at: datetime
+
+
 class UserSubscriptionResponse(BaseModel):
     user_id: str
     tier: str

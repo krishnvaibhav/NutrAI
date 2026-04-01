@@ -44,7 +44,7 @@ def generate_with_fallback(prompt_or_content: Any) -> Any:
             model = genai.GenerativeModel(model_name)
             return model.generate_content(
                 prompt_or_content,
-                request_options={"timeout": 45},
+                request_options={"timeout": 60},
             )
         except Exception as e:
             if _should_fallback(e) and model_name == _PRIMARY_MODEL:
@@ -67,7 +67,7 @@ def generate_vision_with_fallback(parts: list) -> Any:
             model = genai.GenerativeModel(model_name)
             return model.generate_content(
                 parts,
-                request_options={"timeout": 45},
+                request_options={"timeout": 120},
             )
         except Exception as e:
             if _should_fallback(e) and model_name == _VISION_PRIMARY:

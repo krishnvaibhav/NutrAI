@@ -1,5 +1,5 @@
 import logging
-from datetime import date
+from datetime import date, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 from google.cloud.firestore_v1 import transactional, Transaction
 from typing import List
@@ -64,3 +64,34 @@ def suggest_recipes_endpoint(
     except Exception as e:
         logger.exception("Recipe suggestion failed for user %s", uid)
         raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")
+
+
+@router.post("/recipes/saved", response_model=schemas.SavedRecipe, status_code=201)
+def save_recipe(body: schemas.RecipeResponse, db=Depends(get_firestore), user=Depends(get_current_user)):
+    uid = user["uid"]
+    data = body.model_dump()
+    data["saved_at"] = datetime.now(timezone.utc)
+    _, doc_ref = db.collection("users").document(uid).collection("saved_recipes").add(data)
+    return {**data, "id": doc_ref.id}
+
+
+@router.get("/recipes/saved", response_model=List[schemas.SavedRecipe])
+def get_saved_recipes(db=Depends(get_firestore), user=Depends(get_current_user)):
+    uid = user["uid"]
+    docs = db.collection("users").document(uid).collection("saved_recipes").order_by("saved_at", direction="DESCENDING").stream()
+    result = []
+    for doc in docs:
+        d = doc.to_dict()
+        d["id"] = doc.id
+        result.append(d)
+    return result
+
+
+@router.delete("/recipes/saved/{recipe_id}", status_code=204)
+def unsave_recipe(recipe_id: str, db=Depends(get_firestore), user=Depends(get_current_user)):
+    uid = user["uid"]
+    ref = db.collection("users").document(uid).collection("saved_recipes").document(recipe_id)
+    if not ref.get().exists:
+        raise HTTPException(404, "Saved recipe not found")
+    ref.delete()
+    return None

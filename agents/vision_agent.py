@@ -50,3 +50,4 @@ def parse_fridge_image(image_bytes: bytes, mime_type: str) -> List[Dict[str, Any
         if "429" in str(e) or "ResourceExhausted" in str(e):
             raise ValueError("The Vision AI is currently busy. Please wait a moment and try again.")
         raise ValueError("Gemini did not return valid JSON.") from e
+

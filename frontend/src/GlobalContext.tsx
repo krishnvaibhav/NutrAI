@@ -20,8 +20,6 @@ export interface Recipe {
 interface GlobalContextType {
     chatMessages: ChatMessage[];
     setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
-    healthSummary: string;
-    setHealthSummary: (summary: string) => void;
     lastLogCount: number;
     setLastLogCount: (count: number) => void;
     recipes: Recipe[];
@@ -40,8 +38,7 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
         { role: 'assistant', content: "Hi! I'm PantryAI. Tell me what you ate to log nutrition, ask for a recipe, or upload a photo of your fridge to update your pantry!" }
     ]);
-    const [healthSummary, setHealthSummary] = useState<string>('');
-    const [lastLogCount, setLastLogCount] = useState<number>(-1); // -1 means never fetched
+    const [lastLogCount, setLastLogCount] = useState<number>(-1);
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [recipePreferences, setRecipePreferences] = useState<string>('');
     const [recipeTimeOfDay, setRecipeTimeOfDay] = useState<string>('Dinner');
@@ -51,8 +48,6 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         <GlobalContext.Provider value={{
             chatMessages,
             setChatMessages,
-            healthSummary,
-            setHealthSummary,
             lastLogCount,
             setLastLogCount,
             recipes,
