@@ -1,0 +1,44 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/gen-lang-client-0583452353/pantryai-api:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/gen-lang-client-0583452353/pantryai-api:latest'
+      - '.'
+
+  # Push both tags
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/gen-lang-client-0583452353/pantryai-api:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/gen-lang-client-0583452353/pantryai-api:latest']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'pantryai-api'
+      - '--image=gcr.io/gen-lang-client-0583452353/pantryai-api:$COMMIT_SHA'
+      - '--platform=managed'
+      - '--region=us-central1'
+      - '--allow-unauthenticated'
+      - '--memory=512Mi'
+      - '--cpu=1'
+      - '--min-instances=0'
+      - '--max-instances=3'
+      - '--concurrency=80'
+      - '--set-env-vars=ENV=production,PRO_ENABLED=false'
+      - >-
+        --set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest,FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,FRONTEND_URL=FRONTEND_URL:latest,ADMIN_SECRET=ADMIN_SECRET:latest
+
+images:
+  - 'gcr.io/gen-lang-client-0583452353/pantryai-api:$COMMIT_SHA'
+  - 'gcr.io/gen-lang-client-0583452353/pantryai-api:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
